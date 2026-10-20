@@ -69,3 +69,15 @@ def cards_info(operations: list[dict]) -> list[dict]:
         )
     cards.sort(key=lambda x: x["last_digits"])
     return cards
+
+def main_page(date_time: str, operations: list[dict]) -> dict:
+    """Формирует JSON-данные для страницы «Главная» за период с начала месяца по указанную дату."""
+    dt = parse_datetime(date_time)
+    month_ops = filter_month_date(operations, dt)
+    return {
+        "greeting": get_hello(dt),
+        "cards": cards_info(month_ops),
+        "top_transactions": top_transactions(month_ops, limit=5),
+        "currency_rates": [],
+        "stock_prices": [],
+    }

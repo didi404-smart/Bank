@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.views import filter_month_date, get_hello, parse_datetime, top_transactions, cards_info
+from src.views import filter_month_date, get_hello, parse_datetime, top_transactions, cards_info, main_page
 
 
 def test_get_hello():
@@ -61,3 +61,15 @@ def test_cards_info():
         {"last_digits": "1111", "total_spent": 110.0, "cashback": 1},
         {"last_digits": "2222", "total_spent": 250.0, "cashback": 2},
     ]
+
+def test_main_page():
+    operations = [
+        {"operation_datetime": datetime(2021, 12, 1, 10, 0, 0), "card_last4": "1111", "amount": -50,
+         "category": "A", "description": "d1"}
+    ]
+    res = main_page("2021-12-31 16:44:00", operations)
+    assert set(res.keys()) == {"greeting", "cards", "top_transactions", "currency_rates", "stock_prices"}
+    assert res["greeting"] == "Добрый день"
+    assert len(res["top_transactions"]) == 1
+    assert res["currency_rates"] == []
+    assert res["stock_prices"] == []
