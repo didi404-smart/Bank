@@ -1,6 +1,8 @@
 from collections import defaultdict
 from datetime import datetime, time, timedelta
 
+CASH_AND_TRANSFERS = {"Переводы", "Наличные"}
+
 
 def parse_datetime(date_time: str) -> datetime:
     """Преобразует входную строку даты/времени формата 'YYYY-MM-DD HH:MM:SS' в datetime."""
@@ -81,6 +83,7 @@ def main_page(date_time: str, operations: list[dict]) -> dict:
         "stock_prices": [],
     }
 
+
 def get_period(dt: datetime, period: str = "M") -> tuple[datetime, datetime]:
     """Возвращает (start, end) для выбранного периода"""
     period = period.upper()
@@ -99,6 +102,7 @@ def get_period(dt: datetime, period: str = "M") -> tuple[datetime, datetime]:
         return start, end
     raise ValueError("period must be one of: W, M, Y, ALL")
 
+
 def filter_range(operations: list[dict], start: datetime, end: datetime) -> list[dict]:
     """Возвращает операции, у которых start <= operation_datetime <= end"""
     res = []
@@ -107,3 +111,51 @@ def filter_range(operations: list[dict], start: datetime, end: datetime) -> list
         if start <= op_dt <= end:
             res.append(op)
     return res
+
+
+def events_page(date_time: str, operations: list[dict], period: str = "M") -> dict:
+    """Формирует JSON-данные для страницы 'События'"""
+    dt = parse_datetime(date_time)
+    start, end = get_period(dt, period)
+    ops = filter_range(operations, start, end)
+    expense_ops = [op for op in ops if float(op.get("amount", 0)) < 0]
+    income_ops = [op for op in ops if float(op.get("amount", 0)) > 0]
+    expense_cat = defaultdict(float)
+    income_cat = defaultdict(float)
+    for op in expense_ops:
+        cat = op.get("category", "")
+        expense_cat[cat] += abs(float(op.get("amount", 0)))
+    for op in income_ops:
+        cat = op.get("category", "")
+        income_cat[cat] += float(op.get("amount", 0))
+    total_expenses = sum(expense_cat.values())
+    total_incomes = sum(income_cat.values())
+    sorted_exp = sorted(expense_cat.items(), key=lambda x: x[1], reverse=True)
+    top_7 = sorted_exp[:7]
+    rest = sorted_exp[7:]
+    rest_sum = sum(amount for cat, amount in rest)
+    expenses = [{"category": cat, "amount": int(round(amount))} for cat, amount in top_7]
+    if rest_sum > 0:
+        expenses.append({"category": "Остальное", "amount": int(round(rest_sum))})
+    cash_transfers = []
+    for cat in CASH_AND_TRANSFERS:
+        if cat in expense_cat:
+            cash_transfers.append((cat, expense_cat[cat]))
+    cash_transfers.sort(key=lambda x: x[1], reverse=True)
+    expenses_cash = [{"category": cat, "amount": int(round(amount))} for cat, amount in cash_transfers]
+
+    sorted_income = sorted(income_cat.items(), key=lambda x: x[1], reverse=True)
+    incomes = [{"category": cat, "amount": int(round(amount))} for cat, amount in sorted_income]
+    return {
+        "expenses": {
+            "total": int(round(total_expenses)),
+            "main": expenses,
+            "cash_and_transfers": expenses_cash,
+        },
+        "incomes": {
+            "total": int(round(total_incomes)),
+            "main": incomes,
+        },
+        "currency_rates": [],
+        "stock_prices": [],
+    }

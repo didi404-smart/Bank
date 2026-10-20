@@ -1,6 +1,16 @@
 from datetime import datetime
 import pytest
-from src.views import cards_info, filter_month_date, get_hello, main_page, parse_datetime, top_transactions, get_period, filter_range
+from src.views import (
+    cards_info,
+    filter_month_date,
+    get_hello,
+    main_page,
+    parse_datetime,
+    top_transactions,
+    get_period,
+    filter_range,
+    events_page,
+)
 
 
 def test_get_hello():
@@ -82,6 +92,7 @@ def test_main_page():
     assert res["currency_rates"] == []
     assert res["stock_prices"] == []
 
+
 def test_get_period():
     dt = datetime(2021, 12, 31, 16, 44, 0)
     start, end = get_period(dt, "M")
@@ -103,6 +114,7 @@ def test_get_period():
     with pytest.raises(ValueError):
         get_period(dt, "Q")
 
+
 def test_filter_range():
     start = datetime(2021, 12, 1, 0, 0, 0)
     end = datetime(2021, 12, 31, 23, 59, 59)
@@ -111,11 +123,42 @@ def test_filter_range():
         {"operation_datetime": start, "id": "start"},
         {"operation_datetime": datetime(2021, 12, 15, 12, 0, 0), "id": "mid"},
         {"operation_datetime": end, "id": "end"},
-        {"operation_datetime": datetime(2022, 1, 1, 0, 0, 0), "id": "after"}
+        {"operation_datetime": datetime(2022, 1, 1, 0, 0, 0), "id": "after"},
     ]
     res = filter_range(op, start, end)
     assert res == [
         {"operation_datetime": start, "id": "start"},
         {"operation_datetime": datetime(2021, 12, 15, 12, 0, 0), "id": "mid"},
-        {"operation_datetime": end, "id": "end"}
+        {"operation_datetime": end, "id": "end"},
     ]
+
+
+def test_event_page():
+    dt = datetime(2021, 12, 20, 10, 0, 0)
+    ops = []
+    for i in range(8):
+        ops.append(
+            {
+                "operation_datetime": dt,
+                "amount": -(10 + i),
+                "category": f"Cat{i}",
+            }
+        )
+    result = events_page("2021-12-20 10:00:00", ops, period="M")
+    main = result["expenses"]["main"]
+    assert len(main) == 8
+    assert main[-1]["category"] == "Остальное"
+    assert isinstance(main[-1]["amount"], int)
+
+    ops = [
+        {"operation_datetime": datetime(2021, 12, 10, 10, 0, 0), "amount": -500, "category": "Переводы"},
+        {"operation_datetime": datetime(2021, 12, 10, 10, 0, 0), "amount": -200, "category": "Наличные"},
+        {"operation_datetime": datetime(2021, 12, 10, 10, 0, 0), "amount": -100, "category": "Супермаркеты"},
+        {"operation_datetime": datetime(2021, 12, 10, 10, 0, 0), "amount": 1000, "category": "Пополнения"},
+    ]
+    result = events_page("2021-12-31 10:00:00", ops, period="M")
+    assert result["expenses"]["cash_and_transfers"] == [
+        {"category": "Переводы", "amount": 500},
+        {"category": "Наличные", "amount": 200},
+    ]
+    assert result["incomes"]["total"] == 1000
