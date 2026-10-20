@@ -3,7 +3,8 @@ from unittest.mock import patch
 
 import pandas as pd
 
-from src.utils import read_operations, operation_datetime
+from src.utils import operation_datetime, read_operations
+
 
 @patch("src.utils.pd.read_excel")
 def test_read_operation(mock_read_excel):
@@ -35,6 +36,7 @@ def test_read_operation(mock_read_excel):
 
     mock_read_excel.assert_called_once()
 
+
 @patch("src.utils.pd.read_excel")
 def test_read_operation2(mock_read_excel):
     df = pd.DataFrame(
@@ -59,6 +61,7 @@ def test_read_operation2(mock_read_excel):
     assert op["card_last4"] == "719"
 
     mock_read_excel.assert_called_once()
+
 
 def test_operation_datetime():
     value = datetime(2021, 12, 31, 16, 44, 0)
