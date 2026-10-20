@@ -1,5 +1,5 @@
-from datetime import datetime, time
 from collections import defaultdict
+from datetime import datetime, time, timedelta
 
 
 def parse_datetime(date_time: str) -> datetime:
@@ -64,11 +64,10 @@ def cards_info(operations: list[dict]) -> list[dict]:
             spent_card[card] += abs(amount)
     cards = []
     for last4, total_spent in spent_card.items():
-        cards.append(
-            {"last_digits": last4, "total_spent": round(total_spent, 2), "cashback": int(total_spent // 100)}
-        )
+        cards.append({"last_digits": last4, "total_spent": round(total_spent, 2), "cashback": int(total_spent // 100)})
     cards.sort(key=lambda x: x["last_digits"])
     return cards
+
 
 def main_page(date_time: str, operations: list[dict]) -> dict:
     """Формирует JSON-данные для страницы «Главная» за период с начала месяца по указанную дату."""
@@ -81,3 +80,30 @@ def main_page(date_time: str, operations: list[dict]) -> dict:
         "currency_rates": [],
         "stock_prices": [],
     }
+
+def get_period(dt: datetime, period: str = "M") -> tuple[datetime, datetime]:
+    """Возвращает (start, end) для выбранного периода"""
+    period = period.upper()
+    end = dt
+    if period == "M":
+        start = dt.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        return start, end
+    if period == "Y":
+        start = dt.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        return start, end
+    if period == "W":
+        start = (dt - timedelta(days=dt.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+        return start, end
+    if period == "ALL":
+        start = datetime.min.replace(hour=0, minute=0, second=0, microsecond=0)
+        return start, end
+    raise ValueError("period must be one of: W, M, Y, ALL")
+
+def filter_range(operations: list[dict], start: datetime, end: datetime) -> list[dict]:
+    """Возвращает операции, у которых start <= operation_datetime <= end"""
+    res = []
+    for op in operations:
+        op_dt = op["operation_datetime"]
+        if start <= op_dt <= end:
+            res.append(op)
+    return res
