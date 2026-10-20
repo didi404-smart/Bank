@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.views import filter_month_date, get_hello, parse_datetime, top_transactions
+from src.views import filter_month_date, get_hello, parse_datetime, top_transactions, cards_info
 
 
 def test_get_hello():
@@ -47,3 +47,17 @@ def test_top_transactions():
     for item in res:
         assert set(item.keys()) == {"date", "amount", "category", "description"}
         assert item["date"] == "30.12.2021"
+
+def test_cards_info():
+    operations = [
+        {"operation_datetime": datetime(2021, 12, 1, 10, 0, 0), "card_last4": "1111", "amount": -50},
+        {"operation_datetime": datetime(2021, 12, 2, 10, 0, 0), "card_last4": "1111", "amount": -60},
+        {"operation_datetime": datetime(2021, 12, 3, 10, 0, 0), "card_last4": "1111", "amount": 1000},
+        {"operation_datetime": datetime(2021, 12, 1, 10, 0, 0), "card_last4": "2222", "amount": -250},
+        {"operation_datetime": datetime(2021, 12, 1, 10, 0, 0), "card_last4": None, "amount": -999},
+    ]
+    res = cards_info(operations)
+    assert res == [
+        {"last_digits": "1111", "total_spent": 110.0, "cashback": 1},
+        {"last_digits": "2222", "total_spent": 250.0, "cashback": 2},
+    ]
