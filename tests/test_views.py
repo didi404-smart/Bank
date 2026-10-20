@@ -1,6 +1,6 @@
 from datetime import datetime
-
-from src.views import cards_info, filter_month_date, get_hello, main_page, parse_datetime, top_transactions
+import pytest
+from src.views import cards_info, filter_month_date, get_hello, main_page, parse_datetime, top_transactions, get_period, filter_range
 
 
 def test_get_hello():
@@ -81,3 +81,41 @@ def test_main_page():
     assert len(res["top_transactions"]) == 1
     assert res["currency_rates"] == []
     assert res["stock_prices"] == []
+
+def test_get_period():
+    dt = datetime(2021, 12, 31, 16, 44, 0)
+    start, end = get_period(dt, "M")
+    assert start == datetime(2021, 12, 1, 0, 0, 0)
+    assert end == dt
+
+    start, end = get_period(dt, "Y")
+    assert start == datetime(2021, 1, 1, 0, 0, 0)
+    assert end == dt
+
+    start, end = get_period(dt, "W")
+    assert start == datetime(2021, 12, 27, 0, 0, 0)
+    assert end == dt
+
+    start, end = get_period(dt, "ALL")
+    assert end == dt
+    assert start <= datetime(1900, 1, 1)
+
+    with pytest.raises(ValueError):
+        get_period(dt, "Q")
+
+def test_filter_range():
+    start = datetime(2021, 12, 1, 0, 0, 0)
+    end = datetime(2021, 12, 31, 23, 59, 59)
+    op = [
+        {"operation_datetime": datetime(2021, 11, 30, 23, 59, 59), "id": "before"},
+        {"operation_datetime": start, "id": "start"},
+        {"operation_datetime": datetime(2021, 12, 15, 12, 0, 0), "id": "mid"},
+        {"operation_datetime": end, "id": "end"},
+        {"operation_datetime": datetime(2022, 1, 1, 0, 0, 0), "id": "after"}
+    ]
+    res = filter_range(op, start, end)
+    assert res == [
+        {"operation_datetime": start, "id": "start"},
+        {"operation_datetime": datetime(2021, 12, 15, 12, 0, 0), "id": "mid"},
+        {"operation_datetime": end, "id": "end"}
+    ]

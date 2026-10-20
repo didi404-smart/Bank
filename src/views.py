@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 
 
 def parse_datetime(date_time: str) -> datetime:
@@ -80,3 +80,30 @@ def main_page(date_time: str, operations: list[dict]) -> dict:
         "currency_rates": [],
         "stock_prices": [],
     }
+
+def get_period(dt: datetime, period: str = "M") -> tuple[datetime, datetime]:
+    """Возвращает (start, end) для выбранного периода"""
+    period = period.upper()
+    end = dt
+    if period == "M":
+        start = dt.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        return start, end
+    if period == "Y":
+        start = dt.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        return start, end
+    if period == "W":
+        start = (dt - timedelta(days=dt.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+        return start, end
+    if period == "ALL":
+        start = datetime.min.replace(hour=0, minute=0, second=0, microsecond=0)
+        return start, end
+    raise ValueError("period must be one of: W, M, Y, ALL")
+
+def filter_range(operations: list[dict], start: datetime, end: datetime) -> list[dict]:
+    """Возвращает операции, у которых start <= operation_datetime <= end"""
+    res = []
+    for op in operations:
+        op_dt = op["operation_datetime"]
+        if start <= op_dt <= end:
+            res.append(op)
+    return res
