@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.views import filter_month_date, get_hello, parse_datetime, top_transactions, cards_info, main_page
+from src.views import cards_info, filter_month_date, get_hello, main_page, parse_datetime, top_transactions
 
 
 def test_get_hello():
@@ -32,6 +32,7 @@ def test_filter_month_date():
         dt,
     ]
 
+
 def test_top_transactions():
     ops = [
         {"operation_datetime": datetime(2021, 12, 30, 10, 0, 0), "amount": -100, "category": "A", "description": "d1"},
@@ -48,6 +49,7 @@ def test_top_transactions():
         assert set(item.keys()) == {"date", "amount", "category", "description"}
         assert item["date"] == "30.12.2021"
 
+
 def test_cards_info():
     operations = [
         {"operation_datetime": datetime(2021, 12, 1, 10, 0, 0), "card_last4": "1111", "amount": -50},
@@ -62,10 +64,16 @@ def test_cards_info():
         {"last_digits": "2222", "total_spent": 250.0, "cashback": 2},
     ]
 
+
 def test_main_page():
     operations = [
-        {"operation_datetime": datetime(2021, 12, 1, 10, 0, 0), "card_last4": "1111", "amount": -50,
-         "category": "A", "description": "d1"}
+        {
+            "operation_datetime": datetime(2021, 12, 1, 10, 0, 0),
+            "card_last4": "1111",
+            "amount": -50,
+            "category": "A",
+            "description": "d1",
+        }
     ]
     res = main_page("2021-12-31 16:44:00", operations)
     assert set(res.keys()) == {"greeting", "cards", "top_transactions", "currency_rates", "stock_prices"}

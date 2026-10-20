@@ -1,5 +1,5 @@
-from datetime import datetime, time
 from collections import defaultdict
+from datetime import datetime, time
 
 
 def parse_datetime(date_time: str) -> datetime:
@@ -64,11 +64,10 @@ def cards_info(operations: list[dict]) -> list[dict]:
             spent_card[card] += abs(amount)
     cards = []
     for last4, total_spent in spent_card.items():
-        cards.append(
-            {"last_digits": last4, "total_spent": round(total_spent, 2), "cashback": int(total_spent // 100)}
-        )
+        cards.append({"last_digits": last4, "total_spent": round(total_spent, 2), "cashback": int(total_spent // 100)})
     cards.sort(key=lambda x: x["last_digits"])
     return cards
+
 
 def main_page(date_time: str, operations: list[dict]) -> dict:
     """Формирует JSON-данные для страницы «Главная» за период с начала месяца по указанную дату."""
