@@ -27,3 +27,24 @@ def filter_month_date(operations: list[dict], dt: datetime) -> list[dict]:
         if start <= op_dt <= dt:
             res.append(op)
     return res
+
+def format_date(dt: datetime) -> str:
+    """Форматирует datetime в строку 'dd.mm.yyyy"""
+    return dt.strftime("%d.%m.%Y")
+
+def top_transactions(operations: list[dict], limit: int = 5) -> list[dict]:
+    """Возвращает top транзакций, отсортированных по убыванию amount."""
+    sort_ops = sorted(operations, key=lambda  op: float(op.get("amount", 0)), reverse=True)
+    top_ops = sort_ops[:limit]
+    res = []
+    for op in top_ops:
+        res.append(
+            {
+                "date": format_date(op["operation_datetime"]),
+                "amount": float(op.get("amount", 0)),
+                "category": op.get("category", ""),
+                "description": op.get("description", ""),
+            }
+        )
+    return res
+
