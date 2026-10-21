@@ -4,7 +4,8 @@ import re
 def search_description(operations: list[dict], word: str) -> list[dict]:
     """Ищет транзакции по подстроке в поле description"""
     w = word.strip().lower()
-    if not w: return []
+    if not w:
+        return []
     res = []
     for op in operations:
         description = str(op.get("description", "")).lower()
@@ -12,10 +13,12 @@ def search_description(operations: list[dict], word: str) -> list[dict]:
             res.append(op)
     return res
 
+
 def format_phone(phone: str) -> str:
     """Приводит телефон к единому виду"""
-    digits = re.sub(r'\D', "", phone)
-    if not digits: return ""
+    digits = re.sub(r"\D", "", phone)
+    if not digits:
+        return ""
     if len(digits) == 10:
         return "7" + digits
     if len(digits) == 11:
@@ -24,9 +27,11 @@ def format_phone(phone: str) -> str:
         return digits
     return ""
 
+
 def find_phone(text: str) -> list[str]:
     """Ищет в description номера телефона"""
-    if not text: return []
+    if not text:
+        return []
     pattern = re.findall(r"(\+?\d[\d\s\-\(\)]{8,}\d)", text)
     res = []
     for p in pattern:
@@ -35,10 +40,12 @@ def find_phone(text: str) -> list[str]:
             res.append(phone)
     return res
 
+
 def search_phone(operations: list[dict], phone_pattern: str) -> list[dict]:
     """Ищет транзакции, в описании которых встречается телефон, соответствующий phone_pattern"""
     phone = format_phone(phone_pattern)
-    if not phone: return []
+    if not phone:
+        return []
     res = []
     for op in operations:
         description = str(op.get("description", ""))

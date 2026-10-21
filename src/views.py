@@ -71,7 +71,7 @@ def cards_info(operations: list[dict]) -> list[dict]:
     return cards
 
 
-def main_page(date_time: str, operations: list[dict]) -> dict:
+def main_page(date_time: str, operations: list[dict], currency_rates: list[dict], stock_prices: list[dict]) -> dict:
     """Формирует JSON-данные для страницы «Главная» за период с начала месяца по указанную дату."""
     dt = parse_datetime(date_time)
     month_ops = filter_month_date(operations, dt)
@@ -79,8 +79,8 @@ def main_page(date_time: str, operations: list[dict]) -> dict:
         "greeting": get_hello(dt),
         "cards": cards_info(month_ops),
         "top_transactions": top_transactions(month_ops, limit=5),
-        "currency_rates": [],
-        "stock_prices": [],
+        "currency_rates": currency_rates,
+        "stock_prices": stock_prices,
         "top_cashback_categories": top_cashback_cat(month_ops),
     }
 
@@ -114,7 +114,9 @@ def filter_range(operations: list[dict], start: datetime, end: datetime) -> list
     return res
 
 
-def events_page(date_time: str, operations: list[dict], period: str = "M") -> dict:
+def events_page(
+    date_time: str, operations: list[dict], currency_rates: list[dict], stock_prices: list[dict], period: str = "M"
+) -> dict:
     """Формирует JSON-данные для страницы 'События'"""
     dt = parse_datetime(date_time)
     start, end = get_period(dt, period)
@@ -157,8 +159,8 @@ def events_page(date_time: str, operations: list[dict], period: str = "M") -> di
             "total": int(round(total_incomes)),
             "main": incomes,
         },
-        "currency_rates": [],
-        "stock_prices": [],
+        "currency_rates": currency_rates,
+        "stock_prices": stock_prices,
     }
 
 

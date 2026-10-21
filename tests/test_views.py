@@ -1,16 +1,18 @@
 from datetime import datetime
+
 import pytest
+
 from src.views import (
     cards_info,
+    events_page,
     filter_month_date,
+    filter_range,
     get_hello,
+    get_period,
     main_page,
     parse_datetime,
-    top_transactions,
-    get_period,
-    filter_range,
-    events_page,
     top_cashback_cat,
+    top_transactions,
 )
 
 
@@ -103,7 +105,7 @@ def test_main_page():
             "cashback": 3,
         },
     ]
-    res = main_page("2021-12-31 16:44:00", operations)
+    res = main_page("2021-12-31 16:44:00", operations, currency_rates=[], stock_prices=[])
     assert set(res.keys()) == {
         "greeting",
         "cards",
@@ -174,7 +176,7 @@ def test_event_page():
                 "category": f"Cat{i}",
             }
         )
-    result = events_page("2021-12-20 10:00:00", ops, period="M")
+    result = events_page("2021-12-20 10:00:00", ops, currency_rates=[], stock_prices=[])
     main = result["expenses"]["main"]
     assert len(main) == 8
     assert main[-1]["category"] == "Остальное"
@@ -186,7 +188,7 @@ def test_event_page():
         {"operation_datetime": datetime(2021, 12, 10, 10, 0, 0), "amount": -100, "category": "Супермаркеты"},
         {"operation_datetime": datetime(2021, 12, 10, 10, 0, 0), "amount": 1000, "category": "Пополнения"},
     ]
-    result = events_page("2021-12-31 10:00:00", ops, period="M")
+    result = events_page("2021-12-31 10:00:00", ops, currency_rates=[], stock_prices=[])
     assert result["expenses"]["cash_and_transfers"] == [
         {"category": "Переводы", "amount": 500},
         {"category": "Наличные", "amount": 200},
