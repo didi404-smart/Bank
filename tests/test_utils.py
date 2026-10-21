@@ -18,6 +18,7 @@ def test_read_operation(mock_read_excel):
                 "Валюта платежа": "RUB",
                 "Категория": "Супермаркеты",
                 "Описание": "Колхоз",
+                "Кэшбэк": 100,
             }
         ]
     )
@@ -33,6 +34,7 @@ def test_read_operation(mock_read_excel):
     assert op["currency"] == "RUB"
     assert op["category"] == "Супермаркеты"
     assert op["description"] == "Колхоз"
+    assert op["cashback"] == 100
 
     mock_read_excel.assert_called_once()
 

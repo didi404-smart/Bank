@@ -81,6 +81,7 @@ def main_page(date_time: str, operations: list[dict]) -> dict:
         "top_transactions": top_transactions(month_ops, limit=5),
         "currency_rates": [],
         "stock_prices": [],
+        "top_cashback_categories": top_cashback_cat(month_ops),
     }
 
 
@@ -159,3 +160,15 @@ def events_page(date_time: str, operations: list[dict], period: str = "M") -> di
         "currency_rates": [],
         "stock_prices": [],
     }
+
+
+def top_cashback_cat(operations: list[dict], limit: int = 3) -> list[dict]:
+    """Возвращает топ категорий по суммарному кешбэку"""
+    cashback_cat = defaultdict(float)
+    for op in operations:
+        cat = op.get("category", "")
+        cashback = float(op.get("cashback", 0))
+        cashback_cat[cat] += cashback
+    sorted_cashback = sorted(cashback_cat.items(), key=lambda x: x[1], reverse=True)
+    top = sorted_cashback[:limit]
+    return [{"category": cat, "cashback": cash} for cat, cash in top]
