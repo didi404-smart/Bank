@@ -10,6 +10,7 @@ from src.views import (
     get_period,
     filter_range,
     events_page,
+    top_cashback_cat,
 )
 
 
@@ -162,3 +163,18 @@ def test_event_page():
         {"category": "Наличные", "amount": 200},
     ]
     assert result["incomes"]["total"] == 1000
+
+def test_top_cashback_category():
+    ops = [
+        {"category": "A", "cashback": 10},
+        {"category": "B", "cashback": 5},
+        {"category": "C", "cashback": 20},
+        {"category": "A", "cashback": 1},
+        {"category": "D", "cashback": 7},
+    ]
+    res = top_cashback_cat(ops)
+    assert res == [
+        {"category": "C", "cashback": 20.0},
+        {"category": "A", "cashback": 11.0},
+        {"category": "D", "cashback": 7.0},
+    ]

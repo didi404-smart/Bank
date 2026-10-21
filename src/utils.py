@@ -34,6 +34,7 @@ def read_operations(path: str) -> list[dict]:
                 "currency": str(row.get("Валюта платежа", "") or "").strip(),
                 "category": str(row.get("Категория", "") or "").strip(),
                 "description": str(row.get("Описание", "") or "").strip(),
+                "cashback": float(row.get("Кэшбэк", 0) or 0)
             }
         )
     return operations
