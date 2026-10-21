@@ -151,12 +151,12 @@ def events_page(
     incomes = [{"category": cat, "amount": int(round(amount))} for cat, amount in sorted_income]
     return {
         "expenses": {
-            "total": int(round(total_expenses)),
+            "total_amount": int(round(total_expenses)),
             "main": expenses,
-            "cash_and_transfers": expenses_cash,
+            "transfers_and_cash": expenses_cash,
         },
-        "incomes": {
-            "total": int(round(total_incomes)),
+        "income": {
+            "total_amount": int(round(total_incomes)),
             "main": incomes,
         },
         "currency_rates": currency_rates,

@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 from src.config import load_user_settings
-from src.services import get_currency_rates, get_prices
+from src.api_clients import get_currency_rates, get_prices
 from src.utils import read_operations
 from src.views import events_page, main_page
 

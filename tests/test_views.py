@@ -176,6 +176,7 @@ def test_event_page():
                 "category": f"Cat{i}",
             }
         )
+
     result = events_page("2021-12-20 10:00:00", ops, currency_rates=[], stock_prices=[])
     main = result["expenses"]["main"]
     assert len(main) == 8
@@ -189,11 +190,12 @@ def test_event_page():
         {"operation_datetime": datetime(2021, 12, 10, 10, 0, 0), "amount": 1000, "category": "Пополнения"},
     ]
     result = events_page("2021-12-31 10:00:00", ops, currency_rates=[], stock_prices=[])
-    assert result["expenses"]["cash_and_transfers"] == [
+
+    assert result["expenses"]["transfers_and_cash"] == [
         {"category": "Переводы", "amount": 500},
         {"category": "Наличные", "amount": 200},
     ]
-    assert result["incomes"]["total"] == 1000
+    assert result["income"]["total_amount"] == 1000
 
 
 def test_top_cashback_category():

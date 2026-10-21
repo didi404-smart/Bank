@@ -1,79 +1,34 @@
-from unittest.mock import Mock, patch
+from datetime import datetime
 
-import pytest
-from requests import RequestException
-
-from src.services import get_currency_rates, get_prices
+from src.services import format_phone, search_text, search_phone
 
 
-@patch("src.services.API_KEY", "test_api_key")
-@patch("src.services.requests.get")
-def test_get_currency(mock_get):
-    mock_response = Mock()
-    mock_response.raise_for_status.return_value = None
-    mock_response.json.return_value = {"Realtime Currency Exchange Rate": {"5. Exchange Rate": "0.0124"}}
-    mock_get.return_value = mock_response
-    res = get_currency_rates(["USD"])
-    assert res == [{"currency": "USD", "rate": 0.0124}]
-    args, kwargs = mock_get.call_args
-    assert kwargs["params"]["function"] == "CURRENCY_EXCHANGE_RATE"
-    assert kwargs["params"]["from_currency"] == "RUB"
-    assert kwargs["params"]["to_currency"] == "USD"
-    assert kwargs["params"]["apikey"] == "test_api_key"
-
-
-@patch("src.services.API_KEY", "test_api_key")
-@patch("src.services.requests.get")
-def test_get_currency_zero(mock_get):
-    mock_response = Mock()
-    mock_response.raise_for_status.return_value = None
-    mock_response.json.return_value = {"Realtime Currency Exchange Rate": {"5. Exchange Rate": "0"}}
-    mock_get.return_value = mock_response
-    res = get_currency_rates(["USD"])
-    assert res == [{"currency": "USD", "rate": 1.0}]
-
-
-@patch("src.services.API_KEY", "test_api_key")
-@patch("src.services.requests.get")
-def test_get_currency_error(mock_get):
-    mock_get.side_effect = RequestException("error")
-    res = get_currency_rates(["USD", "EUR"])
-    assert res == [
-        {"currency": "USD", "rate": 1.0},
-        {"currency": "EUR", "rate": 1.0},
+def test_search_text():
+    ops = [
+        {"operation_datetime": datetime(2021, 12, 1, 10, 0), "description": "Колхоз"},
+        {"operation_datetime": datetime(2021, 12, 2, 10, 0), "description": "Ozon.ru"},
+        {"operation_datetime": datetime(2021, 12, 3, 10, 0), "description": "Магнит"},
     ]
+    res = search_text(ops, "кол")
+    assert res["results"] == [ops[0]]
+    assert search_text(ops, "   ") == {"query": "   ", "results": []}
 
 
-@patch("src.services.API_KEY", "test_api_key")
-@patch("src.services.requests.get")
-def test_get_prices(mock_get):
-    mock_response = Mock()
-    mock_response.raise_for_status.return_value = None
-    mock_response.json.return_value = {"Global Quote": {"05. price": "123.45"}}
-    mock_get.return_value = mock_response
-    res = get_prices(["AAPL"])
-    assert res == [{"stock": "AAPL", "price": 123.45}]
-    args, kwargs = mock_get.call_args
-    assert kwargs["params"]["function"] == "GLOBAL_QUOTE"
-    assert kwargs["params"]["symbol"] == "AAPL"
-    assert kwargs["params"]["apikey"] == "test_api_key"
+def test_format_phone():
+    assert format_phone("+7 (900) 000-00-00") == "79000000000"
+    assert format_phone("8 900 000-00-00") == "79000000000"
+    assert format_phone("9000000000") == "79000000000"
+    assert format_phone("12345") == ""
+    assert format_phone("7 900 000 00 00") == "79000000000"
 
 
-@patch("src.services.API_KEY", "test_api_key")
-@patch("src.services.requests.get")
-def test_get_prices_zero(mock_get):
-    mock_response = Mock()
-    mock_response.raise_for_status.return_value = None
-    mock_response.json.return_value = {"Global Quote": {"05. price": "0"}}
-    mock_get.return_value = mock_response
-    res = get_prices(["AAPL"])
-    assert res == [{"stock": "AAPL", "price": 1.0}]
-
-
-@patch("src.services.API_KEY", None)
-def test_no_api_key():
-    with pytest.raises(RuntimeError):
-        get_prices(["AAPL"])
-
-    with pytest.raises(RuntimeError):
-        get_currency_rates(["USD"])
+def test_search_phone():
+    ops = [
+        {"operation_datetime": datetime(2021, 12, 1, 10, 0)},
+        {"operation_datetime": datetime(2021, 12, 1, 10, 0), "description": "Перевод +7 (900) 000-00-00"},
+        {"operation_datetime": datetime(2021, 12, 2, 10, 0), "description": "Перевод 89000000000"},
+        {"operation_datetime": datetime(2021, 12, 3, 10, 0), "description": "Покупка в магазине"},
+    ]
+    res = search_phone(ops, "8 (900) 000-00-00")
+    assert res["results"] == [ops[1], ops[2]]
+    assert search_phone(ops, "not phone")["results"] == []

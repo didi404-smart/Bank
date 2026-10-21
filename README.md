@@ -12,23 +12,23 @@
 ## Структура проекта
 ```
 .
-├── data/
-│ └── operations.xlsx
-├── src/
-│ ├── config.py # загрузка user_settings.json
-│ ├── main.py # запуск, печать JSON в консоль
-│ ├── services.py # работа с Alpha Vantage API (валюты/акции)
-│ ├── user_services.py # поиск по подстроке, телефону
-│ ├── utils.py # чтение и нормализация Excel
-│ └── views.py # логика страниц "Главная" и "События"
-├── tests/
-│ ├── test_utils.py 
-│ ├── test_views.py
-│ ├── test_services.py
-│ └── test_user_services.py
-├── user_settings.json
-├── .env.example
-└── pyproject.toml
+├── data/  
+│ └── operations.xlsx  
+├── src/  
+│ ├── config.py # загрузка user_settings.json  
+│ ├── main.py # запуск, печать JSON в консоль  
+│ ├── api_clients.py # работа с Alpha Vantage API (валюты/акции)  
+│ ├── services.py # пользовательские сервисы (поиск по подстроке, телефону)  
+│ ├── utils.py # чтение и нормализация Excel  
+│ └── views.py # логика страниц "Главная" и "События"  
+├── tests/  
+│ ├── test_utils.py  
+│ ├── test_views.py  
+│ ├── test_api_clients.py  
+│ └── test_services.py  
+├── user_settings.json  
+├── .env.example  
+└── pyproject.toml 
 ```
 ## Установка
 
@@ -60,3 +60,19 @@ poetry run python -m src.main
 
 Скрипт выведет в консоль JSON для страниц Главная и События.
 По умолчанию используется текущая дата/время. Если за текущий месяц в Excel нет операций, приложение автоматически берёт дату последней операции из файла, чтобы вывод был не пустым.
+
+## Основной функционал
+Страницы (модуль src/views.py)
+1) Главная (main_page): приветствие, данные по картам, топ-транзакции, курсы валют, цены акций, топ-3 категорий по кешбэку.
+2) События (events_page): агрегированные расходы/поступления за период, категории расходов (топ + «Остальное»), отдельно переводы/наличные, а также курсы валют и цены акций.
+
+Внешние API (модуль src/api_clients.py)
+1) Курсы валют через Alpha Vantage
+2) Цены акций через Alpha Vantage
+
+Поиск по операциям (модуль src/services.py)
+- search_text(operations, query) - поиск по подстроке в description и category
+- search_phone(operations, phone_pattern) - поиск операций по телефону в описании
+- format_phone(phone) - нормализация телефона к формату 7XXXXXXXXXX
+- find_phone(text) - извлечение телефонов из строки с помощью re
+

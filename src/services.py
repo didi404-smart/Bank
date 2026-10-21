@@ -1,54 +1,55 @@
-import os
-
-import requests
-from dotenv import load_dotenv
-
-load_dotenv()
-
-API_KEY = os.getenv("API_KEY")
-ALPHA_URL = "https://www.alphavantage.co/query"
+import re
 
 
-def get_currency_rates(currencies: list[str], base: str = "RUB") -> list[dict]:
-    """Получает курсы валют, Возвращает список словарей"""
+def search_text(operations: list[dict], query: str) -> dict:
+    """Ищет транзакции по подстроке в поле description and category"""
+    q = query.strip().lower()
+    if not q:
+        return {"query": query, "results": []}
+
+    def match(op: dict) -> bool:
+        desc = str(op.get("description") or "").lower()
+        cat = str(op.get("category") or "").lower()
+        return q in desc or q in cat
+
+    return {"query": query, "results": list(filter(match, operations))}
+
+
+def format_phone(phone: str) -> str:
+    """Приводит телефон к единому виду"""
+    digits = re.sub(r"\D", "", phone)
+    if not digits:
+        return ""
+    if len(digits) == 10:
+        return "7" + digits
+    if len(digits) == 11:
+        if digits[0] == "8":
+            return "7" + digits[1:]
+        return digits
+    return ""
+
+
+def find_phone(text: str) -> list[str]:
+    """Ищет в тексте номера телефона"""
+    if not text:
+        return []
+    pattern = re.findall(r"(\+?\d[\d\s\-\(\)]{8,}\d)", text)
     res = []
-    if not API_KEY:
-        raise RuntimeError("API_KEY not found in environment (.env)")
-    for cur in currencies:
-        params = {
-            "function": "CURRENCY_EXCHANGE_RATE",
-            "from_currency": base,
-            "to_currency": cur,
-            "apikey": API_KEY,
-        }
-        try:
-            response = requests.get(ALPHA_URL, params=params, timeout=15)
-            response.raise_for_status()
-            data = response.json()
-            rate = float(data["Realtime Currency Exchange Rate"]["5. Exchange Rate"])
-            if rate <= 0:
-                raise ValueError("rate must be > 0")
-            res.append({"currency": cur, "rate": rate})
-        except requests.RequestException, KeyError, TypeError, ValueError:
-            res.append({"currency": cur, "rate": 1.0})
+    for p in pattern:
+        phone = format_phone(p)
+        if phone:
+            res.append(phone)
     return res
 
 
-def get_prices(stocks: list[str]) -> list[dict]:
-    """Получает цены акций"""
-    res = []
-    if not API_KEY:
-        raise RuntimeError("API_KEY not found in environment (.env)")
-    for symbol in stocks:
-        try:
-            params = {"function": "GLOBAL_QUOTE", "symbol": symbol, "apikey": API_KEY}
-            response = requests.get(ALPHA_URL, params=params, timeout=15)
-            response.raise_for_status()
-            data = response.json()
-            price = float(data["Global Quote"]["05. price"])
-            if price <= 0:
-                raise ValueError("price must be > 0")
-            res.append({"stock": symbol, "price": price})
-        except requests.RequestException, KeyError, TypeError, ValueError:
-            res.append({"stock": symbol, "price": 1.0})
-    return res
+def search_phone(operations: list[dict], phone_pattern: str) -> dict:
+    """Ищет транзакции, в описании которых встречается телефон, соответствующий phone_pattern"""
+    phone = format_phone(phone_pattern)
+    if not phone:
+        return {"phone": phone_pattern, "results": []}
+
+    def match(op: dict) -> bool:
+        desc = str(op.get("description") or "")
+        return phone in find_phone(desc)
+
+    return {"phone": phone_pattern, "results": list(filter(match, operations))}
