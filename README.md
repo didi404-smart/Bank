@@ -20,11 +20,13 @@
 │ ├── api_clients.py # работа с Alpha Vantage API (валюты/акции)  
 │ ├── services.py # пользовательские сервисы (поиск по подстроке, телефону)  
 │ ├── utils.py # чтение и нормализация Excel  
+│ ├── reports.py # отчёты (cashflow, суммы по категориям) 
 │ └── views.py # логика страниц "Главная" и "События"  
 ├── tests/  
 │ ├── test_utils.py  
 │ ├── test_views.py  
 │ ├── test_api_clients.py  
+│ ├── test_reports.py 
 │ └── test_services.py  
 ├── user_settings.json  
 ├── .env.example  
@@ -57,8 +59,17 @@ poetry install
 ```commandline
 poetry run python -m src.main
 ```
-
-Скрипт выведет в консоль JSON для страниц Главная и События.
+Программа выведет в консоль один общий JSON вида:
+```
+{
+  "main": { ... },
+  "events": { ... },
+  "reports": {
+    "cashflow": { ... },
+    "by_category": { ... }
+  }
+}
+```
 По умолчанию используется текущая дата/время. Если за текущий месяц в Excel нет операций, приложение автоматически берёт дату последней операции из файла, чтобы вывод был не пустым.
 
 ## Основной функционал
@@ -69,6 +80,11 @@ poetry run python -m src.main
 Внешние API (модуль src/api_clients.py)
 1) Курсы валют через Alpha Vantage
 2) Цены акций через Alpha Vantage
+
+Отчёты (модуль src/reports.py)
+1) report_cashflow(operations, start=None, end=None). Отчёт по кэшфлоу: income, expenses, net за период.
+2) report_category(operations, start=None, end=None, include_income=False) Отчёт по суммам по категориям за период. По умолчанию учитываются только расходы (отрицательные суммы).
+
 
 Поиск по операциям (модуль src/services.py)
 - search_text(operations, query) - поиск по подстроке в description и category

@@ -2,18 +2,8 @@ from datetime import datetime
 
 import pytest
 
-from src.views import (
-    cards_info,
-    events_page,
-    filter_month_date,
-    filter_range,
-    get_hello,
-    get_period,
-    main_page,
-    parse_datetime,
-    top_cashback_cat,
-    top_transactions,
-)
+from src.views import (cards_info, events_page, filter_month_date, filter_range, get_hello, get_period, main_page,
+                       parse_datetime, top_cashback_cat, top_transactions)
 
 
 def test_get_hello():
