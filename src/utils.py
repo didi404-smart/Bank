@@ -25,16 +25,21 @@ def read_operations(path: str) -> list[dict]:
                 card_last4 = s[-4:]
             else:
                 card_last4 = s
+        amount_raw = row.get("Сумма платежа", 0)
+        amount = 0.0 if pd.isna(amount_raw) else float(amount_raw)
+
+        cashback_raw = row.get("Кэшбэк", 0)
+        cashback = 0.0 if pd.isna(cashback_raw) else float(cashback_raw)
         operations.append(
             {
                 "operation_datetime": op_dt,
                 "card_last4": card_last4,
                 "status": str(row.get("Статус", "") or "").strip(),
-                "amount": float(row.get("Сумма платежа", 0) or 0),
+                "amount": amount,
                 "currency": str(row.get("Валюта платежа", "") or "").strip(),
                 "category": str(row.get("Категория", "") or "").strip(),
                 "description": str(row.get("Описание", "") or "").strip(),
-                "cashback": float(row.get("Кэшбэк", 0) or 0),
+                "cashback": cashback,
             }
         )
     return operations

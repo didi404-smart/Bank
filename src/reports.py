@@ -35,13 +35,13 @@ def sum_amount(op: dict) -> float:
         if key in op and op[key] is not None:
             try:
                 return float(op[key])
-            except TypeError, ValueError:
+            except (TypeError, ValueError):
                 return 0.0
     return 0.0
 
 
 def report_category(
-    operations: list[dict], start: date | None, end: date | None, include_income: bool = False
+    operations: list[dict], start: date | None = None, end: date | None = None, include_income: bool = False
 ) -> dict:
     """Отчёт: суммы по категориям за период"""
     totals = defaultdict(float)
@@ -66,8 +66,8 @@ def report_category(
 
 def report_cashflow(
         operations: list[dict],
-        start: date | None,
-        end: date | None,
+        start: date | None = None,
+        end: date | None = None,
 ) -> dict:
     """ Отчёт: общий кэшфлоу за период"""
     income = 0.0
