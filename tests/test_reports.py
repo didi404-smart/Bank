@@ -1,5 +1,7 @@
 from datetime import date, datetime
-from src.reports import report_cashflow, report_category, format_date, is_period, sum_amount
+
+from src.reports import format_date, is_period, report_cashflow, report_category, sum_amount
+
 
 def test_report_category():
     ops = [
@@ -18,6 +20,7 @@ def test_report_category():
     ]
     res = report_category(ops, start=date(2021, 12, 2), end=date(2021, 12, 9), include_income=True)
     assert res["by_category"] == [{"category": "Зарплата", "amount": 1000.0}]
+
 
 def test_report_cashflow():
     ops = [
@@ -39,12 +42,14 @@ def test_format_date():
     assert format_date("not-a-date") is None
     assert format_date(12345) is None
 
+
 def test_is_period():
     d = date(2021, 12, 5)
     assert is_period(None, None, None) is False
     assert is_period(d, start=date(2021, 12, 6), end=None) is False
     assert is_period(d, start=None, end=date(2021, 12, 4)) is False
     assert is_period(d, start=date(2021, 12, 1), end=date(2021, 12, 31)) is True
+
 
 def test_sum_amount():
     assert sum_amount({}) == 0.0

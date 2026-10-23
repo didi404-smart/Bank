@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.services import format_phone, search_text, search_phone
+from src.services import format_phone, search_phone, search_text
 
 
 def test_search_text():

@@ -1,5 +1,5 @@
-from datetime import date, datetime
 from collections import defaultdict
+from datetime import date, datetime
 
 
 def format_date(value) -> date | None:
@@ -35,7 +35,7 @@ def sum_amount(op: dict) -> float:
         if key in op and op[key] is not None:
             try:
                 return float(op[key])
-            except (TypeError, ValueError):
+            except TypeError, ValueError:
                 return 0.0
     return 0.0
 
@@ -64,12 +64,13 @@ def report_category(
         "by_category": [{"category": k, "amount": round(v, 2)} for k, v in sort_total],
     }
 
+
 def report_cashflow(
-        operations: list[dict],
-        start: date | None = None,
-        end: date | None = None,
+    operations: list[dict],
+    start: date | None = None,
+    end: date | None = None,
 ) -> dict:
-    """ Отчёт: общий кэшфлоу за период"""
+    """Отчёт: общий кэшфлоу за период"""
     income = 0.0
     expenses = 0.0
     for op in operations:
